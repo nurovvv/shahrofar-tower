@@ -191,7 +191,7 @@ const SIGNS = {
     g.fillStyle = '#ffffff';
     g.font = 'bold 20px system-ui, sans-serif';
     g.textAlign = 'center';
-    g.fillText('Shahrofar', w / 2, 124);
+    g.fillText('Шахрофар', w / 2, 124);
     g.font = '15px system-ui, sans-serif';
     g.fillText('8 · 14 · 27', w / 2, 146);
   }),
@@ -208,7 +208,7 @@ const SIGNS = {
     g.fillText('SKYLINE', w / 2, 40);
     g.fillText('RESIDENCE', w / 2, 64);
     g.font = '13px system-ui, sans-serif';
-    g.fillText('Apartments by the river', w / 2, 90);
+    g.fillText('Квартиры у реки', w / 2, 90);
     g.fillStyle = 'rgba(40,30,25,0.6)';
     for (const [x, ww, hh] of [[18, 22, 70], [46, 26, 92], [78, 22, 60]]) g.fillRect(x, h - 20 - hh, ww, hh);
   }),

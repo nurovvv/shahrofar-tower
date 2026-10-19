@@ -44,7 +44,7 @@ export function planFrame(t) {
 }
 
 export const STATUS = {
-  available: { label: 'Available', color: 0x22b573, css: '#22b573' },
-  reserved: { label: 'Reserved', color: 0xf0a92e, css: '#f0a92e' },
-  sold: { label: 'Sold', color: 0xe14d4d, css: '#e14d4d' },
+  available: { label: 'Свободна', color: 0x22b573, css: '#22b573' },
+  reserved: { label: 'Забронирована', color: 0xf0a92e, css: '#f0a92e' },
+  sold: { label: 'Продана', color: 0xe14d4d, css: '#e14d4d' },
 };

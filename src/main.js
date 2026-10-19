@@ -14,10 +14,9 @@ import { Q, setQuality } from './quality.js';
 import { createRenderer, createPipeline } from './render.js';
 import { water } from './materials.js';
 import { updateCars } from './props.js';
+import { money, num, plural, roomsText } from './text.js';
 
 const $ = (s) => document.querySelector(s);
-const roomsText = (n) => `${n}-room`;
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 // ---------- renderer / scene ----------
 // No WebGL (old browser, GPU blocked, context refused): say so and show a still instead of an
@@ -37,7 +36,7 @@ const canvas = renderer.domElement;
 canvas.addEventListener('webglcontextlost', (e) => {
   e.preventDefault();
   $('#nogl').hidden = false;
-  $('#nogl .why').textContent = 'The graphics card stopped the 3D view (too little memory, or the tab was in the background for long).';
+  $('#nogl .why').textContent = 'Видеокарта остановила 3D-просмотр (не хватило памяти или вкладка долго была в фоне).';
 });
 
 const scene = new THREE.Scene();
@@ -89,14 +88,14 @@ modelLoad
   })
   .catch((err) => {
     console.error(err);
-    loadingEl.textContent = 'Could not load the 3D model. Check the connection and reload the page.';
+    loadingEl.textContent = 'Не удалось загрузить 3D-модель. Проверьте подключение и обновите страницу.';
   });
 
 // graphics level switch (bottom right)
 {
   const b = $('#quality');
-  b.textContent = Q.level === 'high' ? 'Graphics: high' : 'Graphics: light';
-  b.title = Q.level === 'high' ? 'Switch to the light mode (faster on phones and older computers)' : 'Switch to full quality';
+  b.textContent = Q.level === 'high' ? 'Графика: высокая' : 'Графика: лёгкая';
+  b.title = Q.level === 'high' ? 'Переключить на лёгкий режим (быстрее на телефонах и старых компьютерах)' : 'Включить полное качество';
   b.onclick = () => setQuality(Q.level === 'high' ? 'low' : 'high');
 }
 
@@ -189,7 +188,7 @@ function buildLabels() {
     const el = document.createElement('div');
     el.className = 'tag';
     el.style.borderColor = STATUS[a.status].css;
-    el.innerHTML = `<b>No. ${a.number}</b> <span>· ${roomsText(a.rooms)} · ${a.area} m²</span><br>${money.format(a.price)}`;
+    el.innerHTML = `<b>№ ${a.number}</b> <span>· ${roomsText(a.rooms)} · ${num(a.area)} м²</span><br>${money.format(a.price)}`;
     el.onclick = () => selectApt(a);
     el.onpointerenter = () => setHover(a);
     el.onpointerleave = () => setHover(null);
@@ -221,7 +220,7 @@ function statusChip(a) {
 
 function renderFloors() {
   const t = TOWER;
-  let html = `<button class="overview-btn" data-act="overview">⌂ Whole building</button><h3>Floors</h3>`;
+  let html = `<button class="overview-btn" data-act="overview">⌂ Всё здание</button><h3>Этажи</h3>`;
   for (const { floor: f } of [...t.floors].reverse()) {
     const list = aptsOnFloor(t.key, f);
     const avail = list.filter((a) => a.status === 'available' && matches(a)).length;
@@ -229,10 +228,10 @@ function renderFloors() {
     const active = state.mode !== 'overview' && state.tower === t.key && state.floor === f;
     html += `<button class="floor-btn ${active ? 'active' : ''}" data-floor="${f}">
       <span class="num">${f}</span>
-      <span class="meta">${avail} available<span class="dots">${dots}</span></span>
+      <span class="meta">свободно ${avail}<span class="dots">${dots}</span></span>
     </button>`;
   }
-  html += `<button class="floor-btn lobby" disabled><span class="num">1–${t.floors[0].floor - 1}</span><span class="meta">Lobby & retail</span></button>`;
+  html += `<button class="floor-btn lobby" disabled><span class="num">1–${t.floors[0].floor - 1}</span><span class="meta">Лобби и коммерция</span></button>`;
   $('#floors').innerHTML = html;
 }
 $('#floors').addEventListener('click', (e) => {
@@ -248,55 +247,56 @@ function renderSide() {
     const avail = apartments.filter((a) => a.status === 'available');
     const from = Math.min(...avail.map((a) => a.price));
     const areas = apartments.map((a) => a.area);
+    const minRooms = Math.min(...apartments.map((a) => a.rooms)), maxRooms = Math.max(...apartments.map((a) => a.rooms));
     side.innerHTML = `
-      <h2>Choose your apartment</h2>
-      <div class="sub">${TOWER.levels} floors · ${apartments.length} apartments · ${Math.min(...apartments.map((a) => a.rooms))}–${Math.max(...apartments.map((a) => a.rooms))} rooms</div>
+      <h2>Выберите квартиру</h2>
+      <div class="sub">${TOWER.levels} ${plural(TOWER.levels, 'этаж', 'этажа', 'этажей')} · ${apartments.length} ${plural(apartments.length, 'квартира', 'квартиры', 'квартир')} · ${minRooms}–${maxRooms} ${plural(maxRooms, 'комната', 'комнаты', 'комнат')}</div>
       <div class="stats">
-        <div class="stat"><b>${avail.length}</b><span>available</span></div>
-        <div class="stat"><b>${money.format(from / 1000)}k</b><span>price from</span></div>
-        <div class="stat"><b>${Math.min(...areas)}–${Math.max(...areas)}</b><span>m²</span></div>
+        <div class="stat"><b>${avail.length}</b><span>свободно</span></div>
+        <div class="stat"><b>${num(Math.round(from / 1000))} тыс. $</b><span>цена от</span></div>
+        <div class="stat"><b>${num(Math.min(...areas))}–${num(Math.max(...areas))}</b><span>м²</span></div>
       </div>
-      <div class="label">Rooms</div>
+      <div class="label">Комнаты</div>
       <div class="seg" data-filter="rooms">
-        ${[0, ...new Set(apartments.map((a) => a.rooms))].sort().map((r) => `<button data-v="${r}" class="${state.filter.rooms === r ? 'on' : ''}">${r ? roomsText(r) : 'All'}</button>`).join('')}
+        ${[0, ...new Set(apartments.map((a) => a.rooms))].sort().map((r) => `<button data-v="${r}" class="${state.filter.rooms === r ? 'on' : ''}">${r ? roomsText(r) : 'Все'}</button>`).join('')}
       </div>
-      <label class="toggle"><input type="checkbox" id="only-avail" ${state.filter.availableOnly ? 'checked' : ''}/> Show available only</label>
-      <div class="note">Pick a floor on the building or in the list to look inside. ${filterActive() ? 'Matching apartments are highlighted on the building.' : ''}</div>`;
+      <label class="toggle"><input type="checkbox" id="only-avail" ${state.filter.availableOnly ? 'checked' : ''}/> Только свободные</label>
+      <div class="note">Выберите этаж на здании или в списке, чтобы заглянуть внутрь. ${filterActive() ? 'Подходящие квартиры подсвечены на здании.' : ''}</div>`;
   } else if (state.mode === 'floor' && !state.apt) {
     const list = aptsOnFloor(state.tower, state.floor);
     side.innerHTML = `
-      <button class="back" data-act="overview">← Whole building</button>
-      <h2>Floor ${state.floor}</h2>
-      <div class="sub">${list.filter((a) => a.status === 'available').length} of ${list.length} apartments available</div>
+      <button class="back" data-act="overview">← Всё здание</button>
+      <h2>Этаж ${state.floor}</h2>
+      <div class="sub">Свободно ${list.filter((a) => a.status === 'available').length} из ${list.length} ${plural(list.length, 'квартиры', 'квартир', 'квартир')}</div>
       <div class="apt-list">
         ${list.map((a) => `
           <button class="apt-row ${filterActive() && !matches(a) ? 'muted' : ''}" data-apt="${a.id}">
-            <span class="t">No. ${a.number}</span><span class="p">${money.format(a.price)}</span>
-            <span class="d">${roomsText(a.rooms)} · ${a.area} m² · ${a.view}</span><span>${statusChip(a)}</span>
+            <span class="t">№ ${a.number}</span><span class="p">${money.format(a.price)}</span>
+            <span class="d">${roomsText(a.rooms)} · ${num(a.area)} м² · ${a.view}</span><span>${statusChip(a)}</span>
           </button>`).join('')}
       </div>
-      <div class="note">Click an apartment on the model or in this list.</div>`;
+      <div class="note">Нажмите на квартиру на модели или в этом списке.</div>`;
   } else if (state.mode === 'floor' && state.apt) {
     const a = state.apt;
     side.innerHTML = `
-      <button class="back" data-act="floor">← Floor ${a.floor}</button>
-      <h2>Apartment No. ${a.number}</h2>
-      <div class="sub">${roomsText(a.rooms)} · ${a.area} m² · Floor ${a.floor}</div>
+      <button class="back" data-act="floor">← Этаж ${a.floor}</button>
+      <h2>Квартира № ${a.number}</h2>
+      <div class="sub">${roomsText(a.rooms)} · ${num(a.area)} м² · ${a.floor} этаж</div>
       <div>${statusChip(a)}</div>
       <canvas class="plan"></canvas>
       <div class="specs">
-        <div><span>Rooms</span><b>${a.rooms}</b></div>
-        <div><span>Total area</span><b>${a.area} m²</b></div>
-        <div><span>Floor</span><b>${a.floor} of ${a.floors}</b></div>
-        <div><span>Ceiling height</span><b>${a.ceiling} m</b></div>
-        <div style="grid-column: span 2"><span>Layout</span><b>${a.summary}${a.balcony ? `, balcony ${a.balcony} m²` : ''}</b></div>
-        <div style="grid-column: span 2"><span>View</span><b>${a.view}</b></div>
+        <div><span>Комнат</span><b>${a.rooms}</b></div>
+        <div><span>Общая площадь</span><b>${num(a.area)} м²</b></div>
+        <div><span>Этаж</span><b>${a.floor} из ${a.floors}</b></div>
+        <div><span>Высота потолков</span><b>${num(a.ceiling)} м</b></div>
+        <div style="grid-column: span 2"><span>Планировка</span><b>${a.summary}${a.balcony ? `, балкон ${num(a.balcony)} м²` : ''}</b></div>
+        <div style="grid-column: span 2"><span>Вид из окон</span><b>${a.view}</b></div>
       </div>
       <div class="price">${money.format(a.price)}</div>
-      <div class="ppm">${money.format(Math.round(a.price / a.area))} per m²</div>
+      <div class="ppm">${money.format(Math.round(a.price / a.area))} за м²</div>
       <div class="actions">
-        <button class="btn primary" data-act="walk">🚶 Walk inside in 3D</button>
-        <button class="btn" data-act="request">Request a viewing</button>
+        <button class="btn primary" data-act="walk">🚶 Прогулка по квартире в 3D</button>
+        <button class="btn" data-act="request">Записаться на просмотр</button>
       </div>`;
     drawPlan(side.querySelector('.plan'), a);
   }
@@ -307,7 +307,7 @@ $('#side').addEventListener('click', (e) => {
   if (b.dataset.act === 'overview') goOverview();
   else if (b.dataset.act === 'floor') selectFloor(state.tower, state.floor);
   else if (b.dataset.act === 'walk') enterWalk(state.apt);
-  else if (b.dataset.act === 'request') toast('Demo: this would send the request to the sales team.');
+  else if (b.dataset.act === 'request') toast('Демо: здесь заявка ушла бы в отдел продаж.');
   else if (b.dataset.apt) selectApt(apartments.find((a) => a.id === b.dataset.apt));
   else if (b.dataset.v !== undefined) {
     state.filter.rooms = +b.dataset.v;
@@ -331,7 +331,7 @@ function refresh() {
   renderSide();
   updateOverlays();
   $('#hint').textContent =
-    state.mode === 'overview' ? 'Drag to rotate · Scroll to zoom · Click a floor' : 'Click an apartment · Drag to rotate · Scroll to zoom';
+    state.mode === 'overview' ? 'Перетащите — поворот · Колесо — масштаб · Нажмите на этаж' : 'Нажмите на квартиру · Перетащите — поворот · Колесо — масштаб';
 }
 
 let toastTimer;
@@ -425,7 +425,7 @@ function enterWalk(a) {
     $('#ext-ui').hidden = true;
     $('#walk-ui').hidden = false;
     document.body.classList.add('walking');
-    $('#walk-title').innerHTML = `<b>No. ${a.number}</b> · ${roomsText(a.rooms)} · ${a.area} m² · Floor ${a.floor} · ${money.format(a.price)}`;
+    $('#walk-title').innerHTML = `<b>№ ${a.number}</b> · ${roomsText(a.rooms)} · ${num(a.area)} м² · ${a.floor} этаж · ${money.format(a.price)}`;
     prepareMinimap(a);
   });
 }
@@ -601,8 +601,8 @@ canvas.addEventListener('pointermove', (e) => {
   if (a && (state.mode === 'overview' || !isOpen(a))) {
     const list = aptsOnFloor(a.tower, a.floor);
     const avail = list.filter((x) => x.status === 'available');
-    const from = avail.length ? `from ${money.format(Math.min(...avail.map((x) => x.price)))}` : 'sold out';
-    tooltip.innerHTML = `<b>Floor ${a.floor}</b><br>${avail.length} of ${list.length} available · ${from}`;
+    const from = avail.length ? `от ${money.format(Math.min(...avail.map((x) => x.price)))}` : 'всё продано';
+    tooltip.innerHTML = `<b>Этаж ${a.floor}</b><br>свободно ${avail.length} из ${list.length} · ${from}`;
     place();
   } else tooltip.style.opacity = 0;
 });

@@ -3,6 +3,7 @@
 // team's export or an admin panel.
 import { PLANS, RESIDENTIAL, planFrame } from './config.js';
 import { centroid, polygonArea } from './geometry.js';
+import { plural } from './text.js';
 
 function mulberry32(a) {
   return () => {
@@ -20,10 +21,10 @@ const rand = mulberry32(20261011);
 const OWN_STREAM = { V24: { rand: mulberry32(20261013), used: 6 } };
 
 const VIEWS = [
-  [45, 'North · river', 1.08],
-  [135, 'East · garden & bridge', 1.05],
-  [225, 'South · city', 1.0],
-  [315, 'West · park', 1.0],
+  [45, 'Север · река', 1.08],
+  [135, 'Восток · сад и мост', 1.05],
+  [225, 'Юг · город', 1.0],
+  [315, 'Запад · парк', 1.0],
 ];
 function viewOf(bearing) {
   for (const [lim, name, k] of VIEWS) if (bearing < lim) return { name, k };
@@ -32,16 +33,15 @@ function viewOf(bearing) {
 
 function summary(rooms) {
   const count = (f) => rooms.filter(f).length;
-  const plural = (n, one, many) => (n > 1 ? `${n} ${many}` : one);
   const parts = [];
   const living = count((r) => r.name === 'Living room'), family = count((r) => r.name === 'Family room');
-  if (living) parts.push(plural(living, 'living room', 'living rooms'));
-  if (family) parts.push(plural(family, 'family room', 'family rooms'));
-  if (count((r) => r.kind === 'kitchen')) parts.push('kitchen');
+  if (living) parts.push(living > 1 ? `${living} гостиные` : 'гостиная');
+  if (family) parts.push(family > 1 ? `${family} семейные комнаты` : 'семейная комната');
+  if (count((r) => r.kind === 'kitchen')) parts.push('кухня');
   const beds = count((r) => r.kind === 'bedroom');
-  if (beds) parts.push(plural(beds, '1 bedroom', 'bedrooms'));
+  if (beds) parts.push(`${beds} ${plural(beds, 'спальня', 'спальни', 'спален')}`);
   const baths = count((r) => r.kind === 'bath' && r.area >= 3); // WCs are not counted
-  if (baths) parts.push(plural(baths, 'bathroom', 'bathrooms'));
+  if (baths) parts.push(baths > 1 ? `${baths} ванные` : 'ванная');
   const s = parts.join(', ');
   return s.charAt(0).toUpperCase() + s.slice(1);
 }

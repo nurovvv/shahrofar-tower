@@ -1,6 +1,6 @@
 # Skyline Residence – one-tower 3D demo
 
-An interactive 3D sales website for a single residential tower: the customer turns the building
+An interactive 3D sales website (in Russian) for a single residential tower: the customer turns the building
 around, hovers a floor to see how many flats are free, opens a floor as a furnished cut-away, picks
 an apartment (floor plan, area, view, price) and walks around inside it.
 

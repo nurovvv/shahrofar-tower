@@ -132,12 +132,12 @@ function materials() {
     g.fillStyle = '#2f5f8f';
     g.fillRect(0, 0, w, 34);
     g.fillStyle = '#ffffff';
-    g.font = 'bold 22px system-ui, sans-serif';
+    g.font = 'bold 19px system-ui, sans-serif';
     g.textAlign = 'center';
-    g.fillText('PLAYGROUND', w / 2, 25);
+    g.fillText('ДЕТСКАЯ ПЛОЩАДКА', w / 2, 24);
     g.fillStyle = '#2b2b2b';
     g.font = '15px system-ui, sans-serif';
-    ['Ages 1–12', 'Under 6 with an adult', 'No dogs · No smoking', 'Open 8:00–21:00 · SOS 112'].forEach((t, i) => g.fillText(t, w / 2, 60 + i * 24));
+    ['Возраст 1–12 лет', 'До 6 лет — со взрослыми', 'Без собак · Не курить', 'Открыто 8:00–21:00 · SOS 112'].forEach((t, i) => g.fillText(t, w / 2, 60 + i * 24));
   });
   return {
     post: std({ color: 0x3f7f3a, roughness: 0.45, metalness: 0.35 }), // powder-coated green

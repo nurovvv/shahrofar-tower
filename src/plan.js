@@ -1,6 +1,7 @@
 // 2D floor plan of an apartment, drawn from the architect's plan (same orientation as the drawings).
 import { PLANS } from './config.js';
 import { bounds, centroid, interiorPoint } from './geometry.js';
+import { num, roomName } from './text.js';
 
 const FILL = {
   living: '#f6eee1', kitchen: '#f3ead8', bedroom: '#e9f0f6', hall: '#f1f0ec', bath: '#e1eef3', storage: '#ecebe7',
@@ -90,11 +91,23 @@ export function drawPlan(canvas, apt, { pad = 14, labels = true } = {}) {
       const [x, y] = r.area > 6 ? interiorPoint(r.poly) : centroid(r.poly);
       const small = r.area < 9;
       g.fillStyle = '#2b2f36';
-      g.font = `600 ${small ? 9 : 11}px system-ui, -apple-system, sans-serif`;
-      g.fillText(r.name, T.px(x), T.py(y) - 6);
+      const nameFont = (px) => (g.font = `600 ${px}px system-ui, -apple-system, sans-serif`);
+      let size = small ? 9 : 11;
+      nameFont(size);
+      // a name wider than the room ("Семейная комната") goes on two lines, in the small size if
+      // it still doesn't fit
+      const { x0, x1 } = bounds(r.poly);
+      const roomW = Math.abs(T.px(x1) - T.px(x0)), name = roomName(r.name);
+      const lines = name.includes(' ') && g.measureText(name).width > roomW * 0.9 ? name.split(' ') : [name];
+      if (size > 9 && Math.max(...lines.map((l) => g.measureText(l).width)) > roomW * 0.9) nameFont((size = 9));
+      const lh = size + 1, top = T.py(y) - 6 - ((lines.length - 1) * lh) / 2;
+      // kept inside the canvas (a room on the plan's edge has its label point near it)
+      const half = Math.max(...lines.map((l) => g.measureText(l).width)) / 2 + 2;
+      const cx = Math.min(Math.max(T.px(x), half), cw - half);
+      lines.forEach((l, i) => g.fillText(l, cx, top + i * lh));
       g.fillStyle = '#6b7280';
       g.font = `${small ? 9 : 10}px system-ui, -apple-system, sans-serif`;
-      g.fillText(`${r.area.toFixed(1)} m²`, T.px(x), T.py(y) + 7);
+      g.fillText(`${num(+r.area.toFixed(1))} м²`, cx, top + (lines.length - 1) * lh + 13);
     }
   }
   return T;

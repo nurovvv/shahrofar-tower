@@ -52,7 +52,7 @@ for (const [tower, floor] of [['V', 5], ['V', 12], ['V', 23], ['V', 24]]) {
     await new Promise((r) => setTimeout(r, 1300));
     const card = document.querySelector('#side h2')?.textContent;
     const plan = document.querySelector('#side canvas.plan');
-    return { n: apts.length, shown, card, want: `Apartment No. ${a.number}`, plan: !!plan && plan.width > 0, mode: app.state.mode };
+    return { n: apts.length, shown, card, want: `Квартира № ${a.number}`, plan: !!plan && plan.width > 0, mode: app.state.mode };
   }, [tower, floor]);
   check(r.shown === r.n && r.card === r.want && r.plan, `floor ${tower}${floor}: ${r.n} flats highlighted (${r.shown}), card "${r.card}", plan drawn ${r.plan}`);
 }
