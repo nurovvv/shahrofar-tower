@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Skyline Residence</title>
+    <meta name="description" content="Interactive 3D demo of a residential tower: pick a floor, open an apartment with its plan and price, and walk around inside." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5f8b'/%3E%3Ctext x='16' y='23' font-size='19' font-family='system-ui' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="labels"></div>
+
+    <div id="ext-ui">
+      <header class="brand panel">
+        <div class="logo">S</div>
+        <div>
+          <div class="brand-name">Skyline Residence</div>
+          <div class="brand-sub">Interactive 3D demo</div>
+        </div>
+      </header>
+
+      <nav id="floors" class="panel" aria-label="Floors"></nav>
+      <aside id="side" class="panel"></aside>
+
+      <div id="legend" class="panel">
+        <span><i style="background: var(--ok)"></i>Available</span>
+        <span><i style="background: var(--warn)"></i>Reserved</span>
+        <span><i style="background: var(--bad)"></i>Sold</span>
+      </div>
+      <div id="hint">Drag to rotate · Scroll to zoom · Click a floor</div>
+    </div>
+
+    <div id="loading" class="panel">Loading the 3D model… <b>0%</b></div>
+    <div id="nogl" hidden>
+      <img src="./fallback.jpg" alt="Skyline Residence: the tower in its garden by the river (rendering)" />
+      <div class="panel">
+        <b>The 3D view can't run in this browser.</b>
+        <p class="why">It needs WebGL 2, which is switched off or not supported here.</p>
+        <p>Open the page in a current Chrome, Safari, Edge or Firefox, or turn on hardware acceleration in the browser settings.</p>
+      </div>
+    </div>
+    <button id="quality" class="btn small" type="button">Graphics</button>
+    <div id="tooltip"></div>
+
+    <div id="walk-ui" hidden>
+      <div class="walk-top">
+        <div id="walk-title" class="panel chip-lg"></div>
+        <button id="exit-walk" class="btn">✕ Exit to building</button>
+      </div>
+      <div id="walk-help" class="panel">Drag to look around · Click the floor to walk there · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / arrows to move</div>
+      <div id="minimap" class="panel"><canvas></canvas></div>
+      <div id="joystick"><div class="knob"></div></div>
+    </div>
+
+    <div id="toast"></div>
+    <div id="fade"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
